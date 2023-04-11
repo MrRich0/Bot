@@ -13,13 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.math.BigDecimal.ROUND_CEILING;
+
 public class MONOCurrencyRateService implements CurrencyRateApiService {
     private static final Gson GSON = new Gson();
     private static final String url = "https://api.monobank.ua/bank/currency";
 
 
     @Override
-    public List<RateResponceDto> getRates() {
+    public List<RateResponceDto> getRates(Integer roundUp) {
         String text = null;
         try {
             text = Jsoup.connect(url).ignoreContentType(true).get().body().text();
@@ -32,8 +34,8 @@ public class MONOCurrencyRateService implements CurrencyRateApiService {
                     RateResponceDto dto = new RateResponceDto();
                     dto.setCurrencyFrom(item.getCurrencySell());
                     dto.setCurrencyTo(item.getCurrencyBuy());
-                    dto.setRateBuy(item.getRateBuy());
-                    dto.setRateSell(item.getRateSell());
+                    dto.setRateBuy(item.getRateBuy().setScale(roundUp,ROUND_CEILING));
+                    dto.setRateSell(item.getRateSell().setScale(roundUp,ROUND_CEILING));
                     return dto;
                 })
                 .collect(Collectors.toList());

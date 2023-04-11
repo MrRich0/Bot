@@ -12,11 +12,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.math.BigDecimal.ROUND_CEILING;
+
 public class NBYCurrencyRateService implements CurrencyRateApiService {
     private static final Gson GSON = new Gson();
     private static final String url = "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json";
     @Override
-    public List<RateResponceDto> getRates() {
+    public List<RateResponceDto> getRates(Integer roundUp) {
 
         String text = null;
         try {
@@ -32,8 +34,8 @@ public class NBYCurrencyRateService implements CurrencyRateApiService {
                     RateResponceDto dto = new RateResponceDto();
                     dto.setCurrencyFrom(item.getCc());
                     dto.setCurrencyTo(item.getCurrencyTo());
-                    dto.setRateBuy(item.getRate());
-                    dto.setRateSell(BigDecimal.valueOf(0));
+                    dto.setRateBuy(item.getRate().setScale(roundUp,ROUND_CEILING));
+                    dto.setRateSell(BigDecimal.valueOf(0).setScale(roundUp,ROUND_CEILING));
                     return dto;
                 })
                 .collect(Collectors.toList());
